@@ -1,0 +1,57 @@
+const { withNativeFederation, shareAll } = require('@angular-architects/native-federation/config');
+
+module.exports = withNativeFederation({
+  name: 'mfe-widget-b',
+
+  // Import shared services from shell when in standalone mode
+  remotes: {
+    shell: 'http://localhost:4200/remoteEntry.json'
+  },
+
+  exposes: {
+    './Widget': './projects/mfe-widget-b/src/app/widget-b.component.ts',
+  },
+  shared: {
+    ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+    // Angular CDK modules for Fractalia components
+    '@angular/cdk/bidi': {
+      singleton: true,
+      strictVersion: false,
+      requiredVersion: 'auto'
+    },
+    '@angular/cdk/overlay': {
+      singleton: true,
+      strictVersion: false,
+      requiredVersion: 'auto'
+    },
+    '@angular/cdk/portal': {
+      singleton: true,
+      strictVersion: false,
+      requiredVersion: 'auto'
+    },
+    // Fractalia components shared across all microfrontends
+    '@fractalia/components': {
+      singleton: true,
+      strictVersion: false,
+      requiredVersion: 'auto'
+    },
+    '@fractalia-apps/components': {
+      singleton: true,
+      strictVersion: false,
+      requiredVersion: 'auto'
+    }
+  },
+  skip: [
+    'rxjs/ajax',
+    'rxjs/fetch',
+    'rxjs/testing',
+    'rxjs/webSocket',
+    // Fractalia dependencies to skip (pero no CDK que lo estamos compartiendo)
+    'cropperjs',
+    'ng2-charts',
+    'chart.js'
+  ],
+  features: {
+    ignoreUnusedDeps: true,
+  },
+});
