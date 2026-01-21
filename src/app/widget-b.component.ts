@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { onTopic } from '@shared/mf-bus';
-import { NotificationItem, Topics } from '@shared/mf-events';
+import { onTopic, publish } from '../../shared/mf-bus/mf-bus';
+import { NotificationItem, Topics } from '../../shared/mf-bus/events';
 
 @Component({
   selector: 'app-widget-b',

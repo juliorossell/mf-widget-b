@@ -4,11 +4,9 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 import { routes } from './app.routes';
 
-// Import shared JWT interceptor
-import { provideJwtInterceptor } from '../../../shared/interceptors';
-
-// Import CoreLayout service and initializer for standalone mode
-import { CoreLayoutService, coreLayoutInitializerProvider } from '../../../shared/core/core-layout';
+import { CoreLayoutService } from './../../shared/core/core-layout/core-layout.service';
+import { coreLayoutInitializerProvider } from './../../shared/core/core-layout/core-layout.initializer';
+import { provideJwtInterceptor } from './../../shared/interceptors';
 
 // Function to check if running in standalone mode
 function isStandalone(): boolean {

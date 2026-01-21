@@ -5,11 +5,11 @@ module.exports = withNativeFederation({
 
   // Import shared services from shell when in standalone mode
   remotes: {
-    shell: 'http://localhost:4200/remoteEntry.json'
+    shell: 'https://fractalia-shell.netlify.app/remoteEntry.json'
   },
 
   exposes: {
-    './Widget': './projects/mfe-widget-b/src/app/widget-b.component.ts',
+    './Widget': './src/app/widget-b.component.ts',
   },
   shared: {
     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
