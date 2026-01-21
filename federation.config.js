@@ -5,7 +5,7 @@ module.exports = withNativeFederation({
 
   // Import shared services from shell when in standalone mode
   remotes: {
-    shell: 'https://fractalia-shell.netlify.app/remoteEntry.json'
+    shell: 'https://shell-multirepo.netlify.app/remoteEntry.json'
   },
 
   exposes: {
@@ -48,10 +48,9 @@ module.exports = withNativeFederation({
     'rxjs/webSocket',
     // Fractalia dependencies to skip (pero no CDK que lo estamos compartiendo)
     'cropperjs',
-    'ng2-charts',
-    'chart.js'
-  ],
-  features: {
-    ignoreUnusedDeps: true,
-  },
+    'chart.js',  // widget-b no usa chart.js
+    'primeng',
+    '@fractalia/itcss',
+    'leaflet'
+  ]
 });
