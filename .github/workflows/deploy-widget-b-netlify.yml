@@ -98,10 +98,10 @@ jobs:
           # Check if remoteEntry.js is accessible with retries
           max_retries=5
           retry_count=0
-          
+
           while [ $retry_count -lt $max_retries ]; do
             response=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/remoteEntry.js" || echo "000")
-            
+
             if [ "$response" = "200" ]; then
               echo "✅ Widget-B remoteEntry.js is accessible"
               break
@@ -111,7 +111,7 @@ jobs:
               retry_count=$((retry_count + 1))
             fi
           done
-          
+
           if [ $retry_count -eq $max_retries ]; then
             echo "❌ Widget-B remoteEntry.js failed to respond after $max_retries attempts"
             echo "🔍 Let's check what's actually deployed..."
