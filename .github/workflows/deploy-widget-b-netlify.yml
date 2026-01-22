@@ -88,6 +88,12 @@ jobs:
           echo "🔧 Rebuilding native modules..."
           npm rebuild
           echo "✅ Installation completed"
+          
+          echo "🔍 Verifying key dependencies:"
+          npm list @angular/core || echo "⚠️ @angular/core not found"
+          npm list @angular/common || echo "⚠️ @angular/common not found"
+          npm list rxjs || echo "⚠️ rxjs not found"
+          npm list @angular-architects/native-federation || echo "⚠️ native-federation not found"
 
       - name: 🔍 Show build script (debug)
         shell: bash
@@ -107,20 +113,38 @@ jobs:
       - name: 🏗️ Build Widget-B for Production
         shell: bash
         run: |
+          echo "🔍 Current working directory:"
+          pwd
+          
+          echo "🔍 Available files in root:"
+          ls -la *.json || echo "No .json files found"
+          
+          echo "🔍 Checking TypeScript config files:"
+          ls -la tsconfig*.json || echo "No tsconfig files found"
+          
+          echo "🔍 Angular config:"
+          ls -la angular.json || echo "No angular.json found"
+          
+          echo "🔍 Node modules structure:"
+          ls -la node_modules/@angular/ | head -10 || echo "Angular modules not found"
+          
           node -v
           npx ng version
+          
+          echo "🏗️ Starting build process..."
           # Try different build script names
-          if npm run build:mf-widget-b:prod; then
-            echo "✅ Widget-B built successfully with build:mf-widget-b:prod"
+          if npm run build:mfe-widget-b:prod; then
+            echo "✅ Widget-B built successfully with build:mfe-widget-b:prod"
           elif npm run build:multirepo; then
             echo "✅ Widget-B built successfully with build:multirepo"
           else
             echo "❌ Build failed with all attempted scripts"
             echo "📋 Available scripts:"
             npm run
+            echo "🔍 Package.json content:"
+            cat package.json | jq .scripts || cat package.json
             exit 1
           fi
-          echo "✅ Widget-B built successfully"
 
       - name: 🔧 Configure CORS Headers
         shell: bash
