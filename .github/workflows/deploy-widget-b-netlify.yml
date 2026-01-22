@@ -70,6 +70,7 @@ jobs:
         echo "✅ CORS headers configured"
 
     - name: 🚀 Deploy to Netlify
+      id: netlify-deploy
       uses: nwtgck/actions-netlify@v2.0
       with:
         publish-dir: './dist/mfe-widget-b/browser'
@@ -87,13 +88,36 @@ jobs:
         shell: bash
         run: |
           echo "🔍 Validating Widget-B deployment..."
-          sleep 10
+          echo "⏳ Waiting for deployment to be ready..."
+          sleep 30
 
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://fractalia-widget-b.netlify.app/remoteEntry.js)
-          if [ "$response" = "200" ]; then
-            echo "✅ Widget-B remoteEntry.js is accessible"
-          else
-            echo "❌ remoteEntry.js returned HTTP $response"
+          # Get the deployed URL from Netlify output or use default
+          DEPLOY_URL="${{ steps.netlify-deploy.outputs.deploy-url || 'https://fractalia-widget-b.netlify.app' }}"
+          echo "🔗 Testing deployment at: $DEPLOY_URL"
+
+          # Check if remoteEntry.js is accessible with retries
+          max_retries=5
+          retry_count=0
+          
+          while [ $retry_count -lt $max_retries ]; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/remoteEntry.js" || echo "000")
+            
+            if [ "$response" = "200" ]; then
+              echo "✅ Widget-B remoteEntry.js is accessible"
+              break
+            else
+              echo "⏳ Attempt $((retry_count + 1))/$max_retries: remoteEntry.js returned HTTP $response, retrying in 15s..."
+              sleep 15
+              retry_count=$((retry_count + 1))
+            fi
+          done
+          
+          if [ $retry_count -eq $max_retries ]; then
+            echo "❌ Widget-B remoteEntry.js failed to respond after $max_retries attempts"
+            echo "🔍 Let's check what's actually deployed..."
+            curl -v "$DEPLOY_URL/remoteEntry.js" 2>&1 || true
+            echo "🔍 Build directory structure:"
+            ls -la dist/mfe-widget-b/browser/ || true
             exit 1
           fi
 
