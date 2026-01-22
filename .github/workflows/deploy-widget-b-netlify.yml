@@ -91,7 +91,7 @@ jobs:
 
       - name: 🔍 Show build script (debug)
         shell: bash
-        run: node -p "require('./package.json').scripts['build:mfe-widget-b:prod']"
+        run: node -p "require('./package.json').scripts['build:mf-widget-b:prod'] || require('./package.json').scripts['build:multirepo'] || 'No build script found'"
 
       - name: 🔄 Use production federation config
         shell: bash
@@ -109,14 +109,39 @@ jobs:
         run: |
           node -v
           npx ng version
-          npm run build:mfe-widget-b:prod
+          # Try different build script names
+          if npm run build:mf-widget-b:prod; then
+            echo "✅ Widget-B built successfully with build:mf-widget-b:prod"
+          elif npm run build:multirepo; then
+            echo "✅ Widget-B built successfully with build:multirepo"
+          else
+            echo "❌ Build failed with all attempted scripts"
+            echo "📋 Available scripts:"
+            npm run
+            exit 1
+          fi
           echo "✅ Widget-B built successfully"
 
       - name: 🔧 Configure CORS Headers
         shell: bash
         run: |
           echo "🔧 Configuring CORS headers..."
-          cat > dist/mfe-widget-b/browser/_headers << 'EOF'
+          # Check which directory was created by the build
+          BUILD_DIR=""
+          if [ -d "dist/mf-widget-b/browser" ]; then
+            BUILD_DIR="dist/mf-widget-b/browser"
+          elif [ -d "dist/mfe-widget-b/browser" ]; then
+            BUILD_DIR="dist/mfe-widget-b/browser"
+          else
+            echo "🔍 Checking available build directories:"
+            ls -la dist/ || true
+            echo "❌ Could not find build directory"
+            exit 1
+          fi
+
+          echo "✅ Using build directory: $BUILD_DIR"
+
+          cat > "$BUILD_DIR/_headers" << 'EOF'
           /*
             Access-Control-Allow-Origin: *
             Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
@@ -133,13 +158,13 @@ jobs:
             Cache-Control: public, max-age=31536000
             Access-Control-Allow-Origin: *
           EOF
-          echo "✅ CORS headers configured"
+          echo "✅ CORS headers configured in $BUILD_DIR"
 
       - name: 🚀 Deploy to Netlify
         id: netlify-deploy
         uses: nwtgck/actions-netlify@v2.0
         with:
-          publish-dir: './dist/mfe-widget-b/browser'
+          publish-dir: './dist/mf-widget-b/browser'
           production-branch: main
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Deploy Widget-B from GitHub Actions - ${{ github.sha }}"
@@ -194,7 +219,7 @@ jobs:
             echo "🔍 Let's check what's actually deployed..."
             curl -v "$DEPLOY_URL/remoteEntry.js" 2>&1 || true
             echo "🔍 Build directory structure:"
-            ls -la dist/mfe-widget-b/browser/ || true
+            ls -la dist/mf-widget-b/browser/ || ls -la dist/mfe-widget-b/browser/ || ls -la dist/ || true
             exit 1
           fi
 
